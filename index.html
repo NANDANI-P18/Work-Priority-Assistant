@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intelligent Work Priority Assistant</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="login-logo">WPA</div>
+      <h1>Work Priority Assistant</h1>
+      <p class="subtitle">GTU Intelligent Task Prioritization System</p>
+      <div id="login-error">Incorrect username or password</div>
+      <input type="text"     id="username" placeholder="Username" autocomplete="off"/>
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+      <div class="demo-accounts">
+        <strong>Demo Accounts</strong>
+        <div class="demo-row"><span class="role-pill member">Team Member</span> rajvi / ts@306</div>
+        <div class="demo-row"><span class="role-pill mentor">Faculty Mentor</span> mentor / faculty@33</div>
+        <div class="demo-row"><span class="role-pill teacher">Subject Teacher</span> teacher / teach@123</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app" class="hidden">
+
+    <!-- Navbar -->
+    <nav>
+      <div class="nav-brand">WPA</div>
+      <div class="nav-links">
+        <button onclick="showSection('tasks')"     class="nav-btn active" id="btn-tasks">Tasks</button>
+        <button onclick="showSection('matrix')"    class="nav-btn"        id="btn-matrix">Matrix</button>
+        <button onclick="showSection('dashboard')" class="nav-btn"        id="btn-dashboard">Dashboard</button>
+        <button onclick="showSection('alerts')"    class="nav-btn"        id="btn-alerts">Alerts</button>
+        <button onclick="showSection('reports')"   class="nav-btn"        id="btn-reports">Reports</button>
+      </div>
+      <div class="nav-user">
+        <div class="user-avatar" id="user-avatar">R</div>
+        <span id="user-info"></span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </nav>
+
+    <!-- Alert Banner -->
+    <div id="alert-banner" class="hidden"></div>
+
+    <!-- ========== TASKS SECTION ========== -->
+    <section id="section-tasks">
+      <div class="section-header">
+        <div>
+          <h2>Task List</h2>
+          <p class="section-sub">Automatically sorted by priority score</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-secondary" onclick="openEmailParser()">+ Import from Email</button>
+          <button class="btn-primary"   onclick="openAddModal()">+ Add Task</button>
+        </div>
+      </div>
+
+      <!-- AI Suggestion -->
+      <div id="suggestion-box" class="suggestion-box"></div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <select id="filter-category" onchange="renderTasks()">
+          <option value="all">All Categories</option>
+          <option value="GTU Submission">GTU Submission</option>
+          <option value="Event">Event</option>
+          <option value="Academic">Academic</option>
+          <option value="Management">Management</option>
+        </select>
+        <select id="filter-status" onchange="renderTasks()">
+          <option value="all">All Status</option>
+          <option value="pending">Pending</option>
+          <option value="done">Done</option>
+        </select>
+        <select id="filter-quadrant" onchange="renderTasks()">
+          <option value="all">All Quadrants</option>
+          <option value="1">Q1 — Do First</option>
+          <option value="2">Q2 — Schedule</option>
+          <option value="3">Q3 — Delegate</option>
+          <option value="4">Q4 — Eliminate</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table id="task-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Task</th>
+              <th>Assigned To</th>
+              <th>Category</th>
+              <th>Days Left</th>
+              <th>Impact</th>
+              <th>Effort</th>
+              <th>Score</th>
+              <th>Quadrant</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="task-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== MATRIX SECTION ========== -->
+    <section id="section-matrix" class="hidden">
+      <div class="section-header">
+        <div>
+          <h2>Eisenhower Matrix</h2>
+          <p class="section-sub">Tasks auto-placed based on deadline and impact</p>
+        </div>
+      </div>
+      <div class="matrix-axis-label top">IMPORTANT</div>
+      <div class="matrix-grid">
+        <div class="matrix-q q1">
+          <div class="q-header">Q1 — Do First</div>
+          <div class="q-sub">Urgent + Important</div>
+          <div class="q-tasks" id="q1-tasks"></div>
+        </div>
+        <div class="matrix-q q2">
+          <div class="q-header">Q2 — Schedule</div>
+          <div class="q-sub">Not Urgent + Important</div>
+          <div class="q-tasks" id="q2-tasks"></div>
+        </div>
+        <div class="matrix-q q3">
+          <div class="q-header">Q3 — Delegate</div>
+          <div class="q-sub">Urgent + Not Important</div>
+          <div class="q-tasks" id="q3-tasks"></div>
+        </div>
+        <div class="matrix-q q4">
+          <div class="q-header">Q4 — Eliminate</div>
+          <div class="q-sub">Not Urgent + Not Important</div>
+          <div class="q-tasks" id="q4-tasks"></div>
+        </div>
+      </div>
+      <div class="matrix-axis-label bottom">NOT IMPORTANT</div>
+    </section>
+
+    <!-- ========== DASHBOARD SECTION ========== -->
+    <section id="section-dashboard" class="hidden">
+      <div class="section-header">
+        <div>
+          <h2>Manager Dashboard</h2>
+          <p class="section-sub">Real-time team performance overview</p>
+        </div>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <h3>Workload per Team Member</h3>
+          <div id="workload-grid"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Tasks by Quadrant</h3>
+          <div id="quadrant-breakdown"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== ALERTS SECTION ========== -->
+    <section id="section-alerts" class="hidden">
+      <div class="section-header">
+        <div>
+          <h2>Alerts and Reminders</h2>
+          <p class="section-sub">Auto-generated based on deadlines</p>
+        </div>
+      </div>
+      <div id="alerts-list"></div>
+      <h3 style="margin-top:2rem;margin-bottom:0.5rem">Email Alert Preview</h3>
+      <p class="section-sub" style="margin-bottom:1rem">
+        These alerts are auto-generated and would be sent via email in production using EmailJS or SendGrid.
+      </p>
+      <div id="email-alerts"></div>
+    </section>
+
+    <!-- ========== REPORTS SECTION ========== -->
+    <section id="section-reports" class="hidden">
+      <div class="section-header">
+        <div>
+          <h2>Reports and Export</h2>
+          <p class="section-sub">Productivity trends and data export</p>
+        </div>
+        <button class="btn-primary" onclick="exportCSV()">Export CSV</button>
+      </div>
+      <div id="trends-box"></div>
+    </section>
+
+  </div>
+
+  <!-- ========== ADD TASK MODAL ========== -->
+  <div id="modal" class="hidden overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Add New Task</h3>
+        <button class="close-btn" onclick="closeModal()">x</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" id="t-title" placeholder="e.g. GTU Project Expo Registration" />
+        </div>
+        <div class="form-group">
+          <label>Assigned To</label>
+          <input type="text" id="t-assigned" placeholder="Team member name" />
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="t-category">
+            <option value="GTU Submission">GTU Submission</option>
+            <option value="Event">Event</option>
+            <option value="Academic">Academic</option>
+            <option value="Management">Management</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Days Until Deadline</label>
+          <input type="number" id="t-days" placeholder="e.g. 3" min="0" />
+        </div>
+        <div class="form-group slider-group">
+          <label>Business Impact <span class="slider-hint">(1=low, 5=critical)</span></label>
+          <div class="slider-row">
+            <input type="range" id="t-impact" min="1" max="5" value="3"
+              oninput="document.getElementById('impact-val').innerText=this.value">
+            <span class="slider-val" id="impact-val">3</span>
+          </div>
+        </div>
+        <div class="form-group slider-group">
+          <label>Effort Required <span class="slider-hint">(1=easy, 5=very hard)</span></label>
+          <div class="slider-row">
+            <input type="range" id="t-effort" min="1" max="5" value="3"
+              oninput="document.getElementById('effort-val').innerText=this.value">
+            <span class="slider-val" id="effort-val">3</span>
+          </div>
+        </div>
+        <div class="auto-note">
+          Urgency and Eisenhower Quadrant are assigned automatically based on your deadline.
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-primary"   onclick="addTask()">Add Task</button>
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== EMAIL PARSER MODAL ========== -->
+  <div id="email-modal" class="hidden overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Import Task from Email</h3>
+        <button class="close-btn" onclick="closeEmailModal()">x</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.82rem;color:#888;margin-bottom:1rem">
+          Paste email content below. The system will automatically extract task details using keyword detection.
+        </p>
+        <textarea id="email-content" placeholder="Paste email here...
+Example:
+Subject: GTU Project Submission Reminder
+Please submit your project report urgently by tomorrow.
+Team: Alpha
+This is a high priority task."></textarea>
+        <div class="auto-note">
+          System detects: deadline from words like "today", "tomorrow", "urgent", "this week". Impact from words like "critical", "high priority", "important".
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn-primary"   onclick="parseEmail()">Extract Task</button>
+        <button class="btn-secondary" onclick="closeEmailModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
