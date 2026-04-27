@@ -63,7 +63,7 @@ work-priority-assistant/
 
 **Nandani Patel**
 - B.Tech Computer Science Engineering (1st Year)
-- GitHub: [@your-username](https://github.com/your-username)
+- GitHub: [@NANDANI-P18](https://github.com/NANDANI-P18)
 
 ---
 
